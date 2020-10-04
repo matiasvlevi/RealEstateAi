@@ -1,53 +1,4 @@
-function makeDatasets() {
-    //i:8 o:1
-    houses = new DataSet("houses_dataset")
 
-    // i:4 o:4
-    b = new DataSet("Binary");
-    b.add([0,0,0,0,0],[0,0,0,0,1]);
-    b.add([0,0,0,0,1],[0,0,0,1,0]);
-    b.add([0,0,0,1,0],[0,0,0,1,1]);
-    b.add([0,0,0,1,1],[0,0,1,0,0]);
-
-    b.add([0,0,1,0,0],[0,0,1,0,1]);
-    b.add([0,0,1,0,1],[0,0,1,1,0]);
-    b.add([0,0,1,1,0],[0,0,1,1,1]);
-    b.add([0,0,1,1,1],[0,1,0,0,0]);
-
-    b.add([0,1,0,0,0],[0,1,0,0,1]);
-    b.add([0,1,0,0,1],[0,1,0,1,0]);
-    b.add([0,1,0,1,0],[0,1,0,1,1]);
-    b.add([0,1,0,1,1],[0,1,1,0,0]);
-    b.add([0,1,1,0,0],[0,1,1,0,1]);
-    b.add([0,1,1,0,1],[0,1,1,1,0]);
-    b.add([0,1,1,1,0],[0,1,1,1,1]);
-    b.add([0,1,1,1,1],[1,0,0,0,0]);
-
-    b.addTest([1,0,0,0,0],[1,0,0,0,1]); // TESTING
-    b.add([1,0,0,0,1],[1,0,0,1,0]);
-    b.add([1,0,0,1,0],[1,0,0,1,1]);
-    b.add([1,0,0,1,1],[1,0,1,0,0]);
-    b.addTest([1,0,1,0,0],[1,0,1,0,1]); // TESTING
-    b.add([1,0,1,0,1],[1,0,1,1,0]);
-    b.addTest([1,0,1,1,0],[1,0,1,1,1]); // TESTING
-    b.add([1,0,1,1,1],[1,1,0,0,0]);
-    b.addTest([1,1,0,0,0],[1,1,0,0,1]); // TESTING
-    b.add([1,1,0,0,1],[1,1,0,1,0]);
-    b.addTest([1,1,0,1,0],[1,1,0,1,1]); // TESTING
-    b.add([1,1,0,1,1],[1,1,1,0,0]);
-    b.add([1,1,1,0,0],[1,1,1,0,1]);
-    b.add([1,1,1,0,1],[1,1,1,1,0]);
-    b.addTest([1,1,1,1,0],[1,1,1,1,1]); // TESTING
-    // i:2 o:1
-    d = new DataSet("Xor");
-    d.add([1,0],[1]);
-    d.add([0,0],[0]);
-    d.add([1,1],[0]);
-    d.add([0,1],[1]);
-    //console.log(b);
-    //console.log(d);
-
-}
 let b0 = 0;
 let s0 = 0;
 let b1 = 0;
@@ -139,41 +90,6 @@ function parseFile() {
     	delimitersToGuess: [',', '\t', '|', ';', Papa.RECORD_SEP, Papa.UNIT_SEP]
     });
 
-}
-class Graph {
-    constructor() {
-        this.values = [];
-        this.colors = [];
-        this.scale = 1;
-    }
-    addValue(val,col) {
-        this.values.push(val);
-        this.colors.push(col)
-    }
-    graph() {
-
-        for (let v = 0; v < this.values.length; v++) {
-            let values = this.values[v];
-            let color = this.colors[v];
-
-            strokeWeight(2);
-            noFill();
-            beginShape();
-            if (values.length >= wnx*this.scale) {
-                this.scale = this.scale*2;
-            }
-            stroke(0);
-            line(0,200,600,200);
-            stroke(color);
-            for (let i = 0; i < values.length; i++) {
-                let y = map(values[i],0,1,200,0);
-                vertex(i/this.scale,y);
-
-            }
-            endShape();
-
-        }
-    }
 }
 function leakyReLU(x) {
     if (x >= 0) {

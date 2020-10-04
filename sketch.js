@@ -2,7 +2,8 @@ let d;
 let b;
 let nn;
 let indexMax = 20000;
-let graphplot;
+let g;
+let n;
 let losses = [];
 let testlosses = [];
 let accuracies = [];
@@ -12,13 +13,10 @@ let logs = true;
 let globalEpoch = 0;
 let house_pricing_dataset = [];
 let map_ = true;
-let dragged = false
-let xoff = 0;
-let yoff = 0;
-let sliderX;
-let sliderY;
-let zoomSlider = 0;
-let zoom = 1;
+let dragged = false;
+
+let nbOfbatches = 1;
+
 function weightToColor(w) {
  let r = map(w,-1,1,0,255);
  let b = map(w,-1,1,255,0);
@@ -36,29 +34,28 @@ function losAngeles() {
   zoom = 0.2;
 }
 function preload() {
-    //makeDatasets();
+
     sanFrancisco();
     houses = new DataSet("houses_dataset");
     nn = new Dann(9,1);
 
-    nn.addHiddenLayer(9);
-    nn.addHiddenLayer(12);
+    nn.addHiddenLayer(9,leakyReLU);
+    nn.addHiddenLayer(6,leakyReLU);
+    nn.addHiddenLayer(6,leakyReLU);
+    nn.addHiddenLayer(6,leakyReLU);
 
-    //nn.addHiddenLayer(21);
-    nn.addHiddenLayer(12);
-    nn.addHiddenLayer(6);
-
-    //sliderX = createSlider(-1200,2400,0);
-    //sliderY = createSlider(-1200,2400,0);
-    //zoomSlider = createSlider(1,10,10);
+    nn.addHiddenLayer(3,leakyReLU);
+    nn.activation(5,leakyReLU);
     nn.makeWeights();
 
-    graphplot = new Graph(0,0,600,100);
-    graphplot.addValue(losses,color(0,100,255));
-    graphplot.addValue(accuracies,color(200,255,0));
-    nn.lr = 0.0001;
-    //console.log(nn);
+    nn.lr = 0.000001;
     nn.log();
+
+    g = new Graph(0,0,400,100);
+    g.addValue(losses,color(0,100,255));
+    g.addValue(accuracies,color(200,255,0));
+
+    n = new NetPlot(400,0,300,100,nn);
 
 
 }
@@ -151,7 +148,7 @@ let graphFunc = pricesGraph;
 function draw() {
     background(65);
     if (houses.data.length > 0) {
-     train(1,2);
+     train(1,nbOfbatches);
     }
     if (losses.length > 0) {
 
@@ -164,8 +161,8 @@ function draw() {
     //yoff = sliderY.value();
 
     if (losses.length > 0) {
-     graphplot.update();
-
+     g.update();
+     n.render();
 
     }
     if (map_ == true) {
@@ -232,7 +229,7 @@ function train(epoch, div) {
             }
 
         }
-        let loss = sum/set.data.length;
+        let loss = sum/(set.data.length/div);
         if (e == epoch-1) {
             accuracies.push(test(logs));
         } else {
@@ -271,99 +268,7 @@ class Data {
         this.target = target;
     }
 }
-let b0 = 0;
-let s0 = 0;
-let b1 = 0;
-let s1 = 0;
-function parseFile() {
-    let index = 0;
 
-    let biggest = 500001;
-    let smallest = 14999;
-    //let rejects = [291,342,539,564,697,739,1098,1351];
-    let file = document.getElementById("csvFile").files[0];
-    Papa.parse(file,
-    {
-    	delimiter: "",	// auto-detect
-    	newline: "",	// auto-detect
-    	quoteChar: '"',
-    	escapeChar: '"',
-    	header: false,
-    	transformHeader: undefined,
-    	dynamicTyping: false,
-    	preview: 0,
-    	encoding: "",
-    	worker: false,
-    	comments: false,
-    	step: function(results, parser) {
-
-            if (checkValid(index)) {
-                //.console.log(index);
-                house_pricing_dataset.push(results.data);
-                let inputs = [];
-
-
-                let ran = int(random(0,11));
-
-                inputs.push(map(JSON.parse(results.data[0]),-124,-114,0,1));
-                inputs.push(map(JSON.parse(results.data[1]),32.5,42,0,1));
-                inputs.push(map(JSON.parse(results.data[2]),1,52,0,1));
-                inputs.push(map(JSON.parse(results.data[3]),2,9831.5,0,1));
-                inputs.push(map(JSON.parse(results.data[4]),1,1934.20,0,1));
-                inputs.push(map(JSON.parse(results.data[5]),3,5354.85,0,1));
-                inputs.push(map(JSON.parse(results.data[6]),1,1521.25,0,1));
-                inputs.push(map(JSON.parse(results.data[7]),0.5,15,0,1));
-                if (results.data[9] == "INLAND") {
-                    inputs.push(0.25);
-                } else if (results.data[9] == "NEAR BAY") {
-                    inputs.push(0.75);
-                } else if (results.data[9] == "<1H OCEAN") {
-                    inputs.push(0.5);
-                } else {
-                    inputs.push(1);
-                }
-
-
-                let price = map(JSON.parse(results.data[8]),14999,500001,0,1);
-
-                if (ran == 0) {
-                    houses.addTest(inputs,[price]);
-                } else if (ran > 0) {
-                    houses.add(inputs,[price]);
-                }
-
-                //console.log(inputs);
-            } else {
-                //console.log("invalid");
-            }
-            map_ = true;
-            index++;
-        },
-    	complete: function(results, file) {
-	        //console.log("Parsing complete:", results, file);
-        //    console.log(smallest)
-        //    console.log(biggest)
-
-
-            plotGraph();
-            //console.log(b1,s1);
-        },
-    	error: undefined,
-    	download: false,
-    	downloadRequestHeaders: undefined,
-    	downloadRequestBody: undefined,
-    	skipEmptyLines: false,
-    	chunk: undefined,
-    	chunkSize: undefined,
-    	fastMode: undefined,
-    	beforeFirstChunk: undefined,
-    	withCredentials: undefined,
-    	transform: undefined,
-    	delimitersToGuess: [',', '\t', '|', ';', Papa.RECORD_SEP, Papa.UNIT_SEP]
-    });
-
-
-}
 function leakyReLU(x) {
     if (x >= 0) {
         return 1*x;
