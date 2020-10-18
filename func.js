@@ -1,8 +1,4 @@
 
-let b0 = 0;
-let s0 = 0;
-let b1 = 0;
-let s1 = 0;
 function plotGraph() {
 
     if (houses.data.length > 0) {
@@ -138,7 +134,7 @@ function parseFile() {
 
 
             } else {
-                console.log("invalid");
+                //console.log("invalid");
             }
 
             index++;
@@ -179,4 +175,24 @@ function weightToColor(w) {
  let b = map(w,-1,1,255,0);
  let g = 255 - r - b;
  return color(r,g,b);
+}
+class DataSet {
+    constructor(title) {
+        this.data = [];
+        this.testData = [];
+        this.title = title;
+    }
+    add(inputs, target) {
+        this.data.push(new Data(inputs, target));
+    }
+    addTest(inputs, target) {
+        this.testData.push(new Data(inputs, target));
+    }
+
+}
+class Data {
+    constructor(inputs,target) {
+        this.inputs = inputs;
+        this.target = target;
+    }
 }

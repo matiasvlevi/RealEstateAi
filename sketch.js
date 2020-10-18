@@ -2,7 +2,7 @@ let d;
 let b;
 let nn;
 let indexMax = 20000;
-let graphplot;
+let g;
 let losses = [];
 let testlosses = [];
 let accuracies = [];
@@ -29,7 +29,7 @@ let s1 = 0;
 let tlat = [];
 let tlon = [];
 let tprice = [];
-let graphFunc = pricesGraph;
+
 // Zoom the view on a city
 function sanFrancisco() {
   xoff = -500;
@@ -41,16 +41,16 @@ function losAngeles() {
   yoff = 300;
   zoom = 0.2;
 }
-function preload() {
-    //makeDatasets();
+
+function setup() {
     sanFrancisco();
     houses = new DataSet("houses_dataset");
     nn = new Dann(9,1);
 
-    nn.addHiddenLayer(9);
-    nn.addHiddenLayer(12);
-    nn.addHiddenLayer(12);
-    nn.addHiddenLayer(6);
+    nn.addHiddenLayer(9,leakyReLU);
+    nn.addHiddenLayer(12,leakyReLU);
+    nn.addHiddenLayer(9,leakyReLU);
+    nn.addHiddenLayer(6,leakyReLU);
 
     nn.makeWeights();
 
@@ -59,32 +59,28 @@ function preload() {
     nn.log();
 
 
-    graphplot = new Graph(0,0,600,100);
-    graphplot.addValue(losses,color(0,100,255),"loss");
-    graphplot.addValue(accuracies,color(200,255,0),"accuracy");
-}
-function setup() {
+    g = new Graph(0,0,600,100);
+    g.step = 10000
+    g.addValue(losses,color(0,100,255),"loss");
+    g.addValue(accuracies,color(200,255,0),"accuracy");
     createCanvas(wnx,wny);
 }
-
+let graphFunc = pricesGraph;
 function draw() {
     background(65);
     if (houses.data.length > 0) {
-     train(1,2);
+        train(1,2);
     }
     if (losses.length > 0) {
-
-      //train(1);
-      graphFunc = pricesGuessGraph;
+        train(1,2);
+        graphFunc = pricesGuessGraph;
+        g.render();
+    }
+    if(losses.length > 10000*100) {
+        losses = [];
+        accuracies = [];
     }
     plotGraph();
-
-
-    if (losses.length > 0) {
-     graphplot.update();
-
-
-    }
     if (map_ == true) {
 
         graphFunc();
@@ -129,33 +125,38 @@ function test(log) {
     return accuracyPercentage;
 }
 let trainIndex = 0;
-function train(epoch, div) {
+function train(epoch) {
     let set = houses;
 
     for (let e = 0; e < epoch; e++) {
         let sum = 0;
 
         console.log("Epoch :" + (globalEpoch));
-        for (let i = 0; i < set.data.length/div; i++) {
+        for (let i = 0; i < set.data.length; i++) {
             //console.log(set.data[i].target)
             nn.backpropagate(set.data[trainIndex].inputs,set.data[trainIndex].target);
-            sum += nn.loss;
+
+
             if (trainIndex >= set.data.length-1) {
               trainIndex = 0;
             } else {
               trainIndex++;
             }
-
+            losses.push(nn.loss);
         }
-        let loss = sum/set.data.length;
+
         if (e == epoch-1) {
-            accuracies.push(test(logs));
+            let result = test(logs);
+            for (let i =0;i<set.data.length;i++){
+                accuracies.push(result);
+            }
+
         } else {
             accuracies.push(test(false));
         }
         //let ep = globalEpoch+e;
 
-        losses.push(loss);
+
 
         globalEpoch++;
 
@@ -163,24 +164,4 @@ function train(epoch, div) {
     }
 
 
-}
-class DataSet {
-    constructor(title) {
-        this.data = [];
-        this.testData = [];
-        this.title = title;
-    }
-    add(inputs, target) {
-        this.data.push(new Data(inputs, target));
-    }
-    addTest(inputs, target) {
-        this.testData.push(new Data(inputs, target));
-    }
-
-}
-class Data {
-    constructor(inputs,target) {
-        this.inputs = inputs;
-        this.target = target;
-    }
 }
