@@ -1,4 +1,78 @@
+function test(log) {
+    let set = houses;
+    let accuracy = 0;
 
+    let sum = 0;
+
+    for (let i = 0; i < set.testData.length/(indexMax/10000); i++) {
+
+
+        let randomIndex = int(random(0,set.testData.length));
+
+        tlon[i] = set.testData[randomIndex].inputs[0];
+        tlat[i] = set.testData[randomIndex].inputs[1];
+        let outs = [];
+        if (log == true) {
+            outs = nn.feedForward(set.testData[randomIndex].inputs, set.testData[randomIndex].target);
+        } else {
+            outs = nn.feedForward(set.testData[randomIndex].inputs);
+        }
+        tprice[i] = outs[0];
+        accuracy = outs[0] - set.testData[randomIndex].target[0];
+        if (accuracy < 0) {
+            accuracy*=-1;
+        }
+        sum+=accuracy;
+        //console.log(i+" accuracy: " + accuracy);
+    }
+    let accuracyPercentage = (1 - (sum/(set.testData.length/(indexMax/10000))));
+    if (log == true) {
+        console.log("      Accuracy: " + round(accuracyPercentage*1000*100)/1000+"%");
+    }
+
+    return accuracyPercentage;
+}
+let trainIndex = 0;
+function train(epoch) {
+    let set = houses;
+
+    for (let e = 0; e < epoch; e++) {
+        let sum = 0;
+
+        console.log("Epoch :" + (globalEpoch));
+        for (let i = 0; i < set.data.length; i++) {
+            //console.log(set.data[i].target)
+            nn.backpropagate(set.data[trainIndex].inputs,set.data[trainIndex].target);
+
+
+            if (trainIndex >= set.data.length-1) {
+              trainIndex = 0;
+            } else {
+              trainIndex++;
+            }
+            losses.push(nn.loss);
+        }
+
+        if (e == epoch-1) {
+            let result = test(logs);
+            for (let i =0;i<set.data.length;i++){
+                accuracies.push(result);
+            }
+
+        } else {
+            accuracies.push(test(false));
+        }
+        //let ep = globalEpoch+e;
+
+
+
+        globalEpoch++;
+
+
+    }
+
+
+}
 function plotGraph() {
 
     if (houses.data.length > 0) {
