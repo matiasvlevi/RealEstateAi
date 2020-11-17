@@ -45,7 +45,7 @@ function losAngeles() {
 
 function setup() {
     sanFrancisco();
-    houses = new DataSet("houses_dataset");
+    // houses = new DataSet("houses_dataset");
     nn = new Dann(9,1);
 
     nn.addHiddenLayer(9,leakyReLU);
@@ -70,6 +70,7 @@ let graphFunc = pricesGraph;
 function draw() {
     background(65);
     if (houses.data.length > 0) {
+        //JSON.stringify(console.log(houses))
         train(1);
     }
     if (losses.length > 0) {
