@@ -14,5 +14,5 @@ Credits
 Dataset: https://www.kaggle.com/harrywang/housing?select=housing.csv <br />
 Neural Network Library: https://dannjs.org
 
-**A live demo version**
+**For a live demo version**
 https://dannjs.org/liveDemo.html
